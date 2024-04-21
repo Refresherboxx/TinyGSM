@@ -96,7 +96,7 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
         : GsmClientSim7080(modem, mux) {}
 
    public:
-    bool setCleintCertificate(const String& certificateName) {
+    bool setClientCertificate(const String& certificateName) {
       return at->setClientCertificate(certificateName, mux);
     }
 

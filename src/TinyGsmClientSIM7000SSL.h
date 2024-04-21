@@ -119,7 +119,7 @@ class TinyGsmSim7000SSL
  public:
   explicit TinyGsmSim7000SSL(Stream& stream)
       : TinyGsmSim70xx<TinyGsmSim7000SSL>(stream),
-        cleintCertificates(),
+        clientCertificates(),
         certificates() {
     memset(sockets, 0, sizeof(sockets));
   }
