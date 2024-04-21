@@ -433,6 +433,11 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
     return thisModem().waitResponse(5000UL) == 1;
   }
 
+  bool removeFile(const STring& filename) {
+    thisModem.sendAT(GF("+CFSDFILE=3,\""), filename, "\"");
+    return thisModem().waitResponse(5000UL) == 1;
+  }
+
   /*
    * Certificate functions
    */
