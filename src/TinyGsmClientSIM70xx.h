@@ -430,7 +430,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
       return false;
     }
     thisModem().stream.write(data.c_str());
-    return thisModem().wairResponse(5000UL) == 1;
+    return thisModem().waitResponse(5000UL) == 1;
   }
 
   /*
