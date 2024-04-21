@@ -423,7 +423,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   }
 
   // write file to user fs
-  bool writeFile(String& filename, String& data) {
+  bool writeFile(const String& filename, const String& data) {
     // Write to user fs, timeout of 10000ms
     thisModem().sendAT(GF("+CFSWFILE=3,\""), filename, GF("\",0,"), data.length(), GF(",10000"));
     if(thisModem().waitResponse(10000UL, GF("DOWNLOAD")) != 1) {
@@ -440,7 +440,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   // convert a (client-)certificate with key
   // both certificate and key must first be uploaded to the user filesystem
   // the parameters must match the filenames
-  bool convertClientCertificate(String& cert, String& key) {
+  bool convertClientCertificate(const String& cert, const String& key) {
     thisModem().sendAT(GF("+CSSLCFG=\"CONVERT\",1,\""), cert, GF("\",\""), key, "\"");
     return thisModem().waitResponse(5000UL) == 1;
   }
@@ -448,7 +448,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   // convert a CA
   // the CA must first be uploaded to the user filesystem
   // the parameter must match the filename
-  bool convertCA(String& ca) {
+  bool convertCA(const String& ca) {
     thisModem().sendAT(GF("+CSSLCFG=\"CONVERT\",2,\""), ca, "\"");
     return thisModem().waitResponse(5000UL) == 1;
   }
