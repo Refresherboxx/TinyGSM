@@ -434,7 +434,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   }
 
   bool removeFile(const String& filename) {
-    thisModem.sendAT(GF("+CFSDFILE=3,\""), filename, "\"");
+    thisModem().sendAT(GF("+CFSDFILE=3,\""), filename, "\"");
     return thisModem().waitResponse(5000UL) == 1;
   }
 
