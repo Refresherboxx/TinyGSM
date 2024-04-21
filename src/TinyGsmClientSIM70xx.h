@@ -425,7 +425,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   // write file to user fs
   bool writeFile(String& filename, String& data) {
     // Write to user fs, timeout of 10000ms
-    thisModem().sendAT(GF("+CFSWFILE=3,\""), filename, GF("\",0,"), data.length(), GF(",10000")));
+    thisModem().sendAT(GF("+CFSWFILE=3,\""), filename, GF("\",0,"), data.length(), GF(",10000"));
     if(thisModem().waitResponse(10000UL, GF("DOWNLOAD")) != 1) {
       return false;
     }
