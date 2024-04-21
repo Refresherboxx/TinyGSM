@@ -407,6 +407,53 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
   // should implement in sub-classes
 
   /*
+   * Filesystem functions
+   */
+ public:
+  // init the filesystem; needs to be called before any other fs function
+  bool initFilesystem() {
+    thisModem().sendAT(GF("+CFSINIT"));
+    return thisModem().waitResponse() == 1;
+  }
+
+  // stop the filesystem
+  bool stopFilesystem() {
+    thisModem().sendAT(GF("+CFSTERM"));
+    return thisModem().waitResponse() == 1;
+  }
+
+  // write file to user fs
+  bool writeFile(String& filename, String& data) {
+    // Write to user fs, timeout of 10000ms
+    thisModem().sendAT(GF("+CFSWFILE=3,\""), filename, GF("\",0,"), data.length(), GF(",10000")));
+    if(thisModem().waitResponse(10000UL, GF("DOWNLOAD")) != 1) {
+      return false;
+    }
+    thisModem().stream.write(data.c_str());
+    return thisModem().wairResponse(5000UL) == 1;
+  }
+
+  /*
+   * Certificate functions
+   */
+ public:
+  // convert a (client-)certificate with key
+  // both certificate and key must first be uploaded to the user filesystem
+  // the parameters must match the filenames
+  bool convertClientCertificate(String& cert, String& key) {
+    thisModem().sendAT(GF("+CSSLCFG=\"CONVERT\",1,\""), cert, GF("\",\""), key, "\"");
+    return thisModem().waitResponse(5000UL) == 1;
+  }
+
+  // convert a CA
+  // the CA must first be uploaded to the user filesystem
+  // the parameter must match the filename
+  bool convertCA(String& ca) {
+    thisModem().sendAT(GF("+CSSLCFG=\"CONVERT\",2,\""), ca, "\"");
+    return thisModem().waitResponse(5000UL) == 1;
+  }
+
+  /*
    * Utilities
    */
  public:
