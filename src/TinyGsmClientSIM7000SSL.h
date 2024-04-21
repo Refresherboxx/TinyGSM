@@ -119,6 +119,7 @@ class TinyGsmSim7000SSL
  public:
   explicit TinyGsmSim7000SSL(Stream& stream)
       : TinyGsmSim70xx<TinyGsmSim7000SSL>(stream),
+        cleintCertificates(),
         certificates() {
     memset(sockets, 0, sizeof(sockets));
   }
@@ -205,6 +206,12 @@ class TinyGsmSim7000SSL
    * Secure socket layer functions
    */
  protected:
+  bool setClientCertificate(const String& certificateName, const uint8_t mux = 0) {
+    if (mux >= TINY_GSM_MUX_COUNT) return false;
+    clientCertificates[mux] = certificateName;
+    return true;
+  }
+
   bool setCertificate(const String& certificateName, const uint8_t mux = 0) {
     if (mux >= TINY_GSM_MUX_COUNT) return false;
     certificates[mux] = certificateName;
@@ -365,6 +372,16 @@ class TinyGsmSim7000SSL
       if (waitResponse(5000L, GF("+CSSLCFG:")) != 1) return false;
       streamSkipUntil('\n');  // read out the certificate information
       waitResponse();
+
+      if (clientCertificates[mux] != "") {
+        // apply the correct certificate to the connection
+        // AT+CASSLCFG=<cid>,"CACERT",<caname>
+        // <cid> Application connection ID (set with AT+CACID above)
+        // <certname> certificate name
+        sendAT(GF("+CASSLCFG="), mux, ",CERT,\"", clientCertificates[mux].c_str(),
+               "\"");
+        if (waitResponse(5000L) != 1) return false;
+      }
 
       if (certificates[mux] != "") {
         // apply the correct certificate to the connection
@@ -724,6 +741,7 @@ class TinyGsmSim7000SSL
 
  protected:
   GsmClientSim7000SSL* sockets[TINY_GSM_MUX_COUNT];
+  String               clientCertificates[TINY_GSM_MUX_COUNT];
   String               certificates[TINY_GSM_MUX_COUNT];
 };
 

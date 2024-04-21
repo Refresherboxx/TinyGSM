@@ -96,6 +96,10 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
         : GsmClientSim7080(modem, mux) {}
 
    public:
+    bool setCleintCertificate(const String& certificateName) {
+      return at->setClientCertificate(certificateName, mux);
+    }
+
     bool setCertificate(const String& certificateName) {
       return at->setCertificate(certificateName, mux);
     }
@@ -117,6 +121,7 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
  public:
   explicit TinyGsmSim7080(Stream& stream)
       : TinyGsmSim70xx<TinyGsmSim7080>(stream),
+        clientCertificates(),
         certificates() {
     memset(sockets, 0, sizeof(sockets));
   }
@@ -203,6 +208,12 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
    * Secure socket layer functions
    */
  protected:
+  bool setClientCertificate(const String& certificateName, const uint8_t mux = 0) {
+    if (mux >= TINY_GSM_MUX_COUNT) return false;
+    clientCertificates[mux] = certificateName;
+    return true;
+  }
+
   bool setCertificate(const String& certificateName, const uint8_t mux = 0) {
     if (mux >= TINY_GSM_MUX_COUNT) return false;
     certificates[mux] = certificateName;
@@ -371,6 +382,16 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
       if (waitResponse(5000L, GF("+CSSLCFG:")) != 1) return false;
       streamSkipUntil('\n');  // read out the certificate information
       waitResponse();
+
+      if (clientCertificates[mux] != "") {
+        // apply the correct certificate to the connection
+        // AT+CASSLCFG=<cid>,"CACERT",<caname>
+        // <cid> Application connection ID (set with AT+CACID above)
+        // <certname> certificate name
+        sendAT(GF("+CASSLCFG="), mux, ",CERT,\"", clientCertificates[mux].c_str(),
+               "\"");
+        if (waitResponse(5000L) != 1) return false;
+      }
 
       if (certificates[mux] != "") {
         // apply the correct certificate to the connection
@@ -723,6 +744,7 @@ class TinyGsmSim7080 : public TinyGsmSim70xx<TinyGsmSim7080>,
 
  protected:
   GsmClientSim7080* sockets[TINY_GSM_MUX_COUNT];
+  String            clientCertificates[TINY_GSM_MUX_COUNT];
   String            certificates[TINY_GSM_MUX_COUNT];
 };
 
